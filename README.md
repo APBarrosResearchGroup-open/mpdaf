@@ -14,7 +14,7 @@ email:  barros@illinois.edu
 
 Citation:
 
-Shrestha, P. and A.P. Barros (2025): Multi-physics Data Assimilation Framework for Remotely Sensed Snowpacks to Improve Water Prediction. WRR (accepted).
+Shrestha, P., & Barros, A. P. (2025). Multi‐ physics data assimilation framework for remotely sensed Snowpacks to improve water prediction. Water Resources Research, 61, e2024WR037885. https://doi.org/10.1029/2024WR037885
 
 #### Usage:
 
