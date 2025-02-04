@@ -1,0 +1,240 @@
+&perfect_model_obs_nml
+   read_input_state_from_file = .true.,
+   single_file_in             = .false.
+   input_state_files          = "dart_prior.nc"
+
+   write_output_state_to_file = .true.,
+   single_file_out            = .true.
+   output_state_files         = "perfect_output.nc"
+   output_interval            = 1,
+
+   async                      = 2,
+   adv_ens_command            = "./advance_model.csh",
+
+   obs_seq_in_file_name       = "obs_seq.in",
+   obs_seq_out_file_name      = "obs_seq.out",
+   init_time_days             = 0,
+   init_time_seconds          = 0,
+   first_obs_days             = -1,
+   first_obs_seconds          = -1,
+   last_obs_days              = -1,
+   last_obs_seconds           = -1,
+
+   trace_execution            = .false.,
+   output_timestamps          = .false.,
+   print_every_nth_obs        = -1,
+   output_forward_op_errors   = .false.,
+   silence                    = .false.,
+   /
+
+&filter_nml
+   single_file_in               = .false.,
+   input_state_files            = ''
+   input_state_file_list        = 'filter_input_list.txt'
+
+   stages_to_write  = 'preassim', 'analysis', 'output'
+
+   single_file_out              = .false.,
+   output_state_files           = ''
+   output_state_file_list       = 'filter_output_list.txt'
+   output_interval              = 1,
+   output_members               = .true.
+   num_output_state_members     = 0,
+   output_mean                  = .true.
+   output_sd                    = .true.
+   write_all_stages_at_end      = .false.
+
+   ens_size                     = 48,
+   num_groups                   = 1,
+   perturb_from_single_instance = .false.,
+   perturbation_amplitude       = 0.2,
+   distributed_state            = .true.
+
+   async                        = 4,
+   adv_ens_command              = "./advance_model.csh",
+
+   obs_sequence_in_name         = "obs_seq.out",
+   obs_sequence_out_name        = "obs_seq.final",
+   num_output_obs_members       = 48,
+   init_time_days               = -1,
+   init_time_seconds            = -1,
+   first_obs_days               = -1,
+   first_obs_seconds            = -1,
+   last_obs_days                = -1,
+   last_obs_seconds             = -1,
+
+   inf_flavor                  =  5,                       0,
+   inf_initial_from_restart    = .true.,                 .false.,
+   inf_sd_initial_from_restart = .true.,                 .false.,
+   inf_deterministic           = .true.,                 .true.,
+   inf_initial                 = 1.0,                    1.0,
+   inf_lower_bound             = 0.0,                     1.0,
+   inf_upper_bound             = 20.0,                   20.0,
+   inf_damping                 = 0.7,                     1.0,
+   inf_sd_initial              = 0.6,                     0.0,
+   inf_sd_lower_bound          = 0.6,                     0.0,
+   inf_sd_max_change           = 1.05,                    1.05,
+
+   trace_execution              = .false.,
+   output_timestamps            = .false.,
+   output_forward_op_errors     = .false.,
+   silence                      = .false.,
+   /
+
+&smoother_nml
+   num_lags              = 0,
+   start_from_restart    = .false.,
+   output_restart        = .false.,
+   restart_in_file_name  = 'smoother_ics',
+   restart_out_file_name = 'smoother_restart'
+   /
+
+&ensemble_manager_nml
+   /
+
+&assim_tools_nml
+   filter_kind                     = 1,
+   cutoff                          = 0.00002
+   sort_obs_inc                    = .false.,
+   spread_restoration              = .false.,
+   sampling_error_correction       = .false.,
+   adaptive_localization_threshold = -1,
+   distribute_mean                 = .false.
+   output_localization_diagnostics = .false.,
+   localization_diagnostics_file   = 'localization_diagnostics',
+   print_every_nth_obs             = 0
+   /
+
+&cov_cutoff_nml
+   select_localization = 1
+   /
+
+&reg_factor_nml
+   select_regression    = 1,
+   input_reg_file       = "time_mean_reg",
+   save_reg_diagnostics = .false.,
+   reg_diagnostics_file = "reg_diagnostics"
+   /
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.
+   /
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'SNOW_DEPTH','SNOW_WATER_EQUIVALENT'
+   evaluate_these_obs_types   = ''
+   /
+
+#Each variable must have 5 entires.
+# 1: variable name
+# 2: DART KIND
+# 3: minimum value - as a character string - if none, use 'NA'
+# 4: maximum value - as a character string - if none, use 'NA'
+# 5: does the variable get updated in the restart file or not 
+# 'UPDATE' or  'NO COPY_BACK'
+# mshm_variables can only be vertically integrated states (so only two)
+# do not change
+
+&model_nml
+   mshm_geo_file       = '/home/ps98/scratch/inputdata/latlon_mshm.ascii',
+   mshm_restart_nc     = 'dart_prior.nc',
+   time_step_days      = 0,
+   time_step_seconds   = 3600,
+   mshm_sv_fields      = 10,
+   mshm_variables      = 'H2OSNO',     'QTY_SNOW_WATER',   '0.0', 'NA', 'UPDATE',
+                         'SNOW_DEPTH', 'QTY_SNOW_DEPTH',   '0.0', 'NA', 'UPDATE'
+   /
+
+&mshm_to_dart_nml
+   mshm_to_dart_output_file = 'dart_prior.nc',
+   mshm_restart_file  = 'restartMSHM'
+   /
+
+&dart_to_mshm_nml
+   dart_to_mshm_input_file = 'dart_prior.nc',
+   advance_time_present = .false.,
+   mshm_up_restart_file = 'mshm_update_restart',
+   repartition_analysis_file = 'dart_posterior.nc',
+   repartition_swe = 1
+   /
+
+&location_nml
+   horiz_dist_only             = .true.
+   vert_normalization_height   = 1.0
+   approximate_distance        = .false.
+   output_box_info             = .false.
+  /
+
+&utilities_nml
+   TERMLEVEL = 1,
+   module_details = .false.,
+   logfilename = 'dart_log.out',
+   nmlfilename = 'dart_log.nml',
+   write_nml   = 'none'
+   /
+
+&preprocess_nml
+   input_obs_def_mod_file  = '../../../observations/forward_operators/DEFAULT_obs_def_mod.F90'
+   output_obs_def_mod_file = '../../../observations/forward_operators/obs_def_mod.f90'
+   input_obs_qty_mod_file  = '../../../assimilation_code/modules/observations/DEFAULT_obs_kind_mod.F90'
+   output_obs_qty_mod_file = '../../../assimilation_code/modules/observations/obs_kind_mod.f90'
+   obs_type_files          = './obs_def_snow_mod.f90'
+   quantity_files          = '../../../assimilation_code/modules/observations/land_quantities_mod.f90'
+   /
+#obs_type_files          = '../../../observations/forward_operators/obs_def_land_mod.f90'
+
+&obs_sequence_tool_nml
+   filename_seq      = 'obs_seq.one', 'obs_seq.two',
+   filename_out      = 'obs_seq.processed',
+   first_obs_days    = -1,
+   first_obs_seconds = -1,
+   last_obs_days     = -1,
+   last_obs_seconds  = -1,
+   print_only        = .false.,
+   gregorian_cal     = .false.
+   /
+
+&obs_diag_nml
+   obs_sequence_name     = 'obs_seq.final',
+   bin_width_days        = -1,
+   bin_width_seconds     = -1,
+   init_skip_days        = 0,
+   init_skip_seconds     = 0,
+   Nregions              = 3,
+   trusted_obs           = 'null',
+   lonlim1               = 0.00, 0.00, 0.50
+   lonlim2               = 1.01, 0.50, 1.01
+   reg_names             = 'whole', 'yin', 'yang'
+   create_rank_histogram = .true.,
+   outliers_in_histogram = .true.,
+   use_zero_error_obs    = .false.,
+   verbose               = .false.
+   /
+
+&state_vector_io_nml
+   /
+#iy =31 ix =6 252.0675211571875  39.09141005469726
+#snow_depth = 0.311752 m
+# (iy-1)*nx + ix = x_ind
+
+&model_mod_check_nml
+   input_state_files    = 'dart_prior.nc'
+   output_state_files   = 'dart_posterior.nc'
+   test1thru            = 0
+   run_tests            = 1,2,3,4,5,7
+   x_ind                = 486
+   loc_of_interest      = 252.0675, 39.0914, 0.
+   quantity_of_interest = 'QTY_SNOW_DEPTH'
+   interp_test_lonrange  = 252.064, 252.075
+   interp_test_dlon      = 0.0833 
+   interp_test_latrange  = 39.067, 39.10
+   interp_test_dlat      = 0.0833
+   interp_test_vertrange = 0.0, 0.0
+   verbose              = .true.
+   /
+
+&quality_control_nml
+   input_qc_threshold       =  3.0,
+   outlier_threshold        =  3.0,
+/
+

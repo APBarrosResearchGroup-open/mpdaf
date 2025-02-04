@@ -1,0 +1,18 @@
+! namelist.nml
+&CTRL
+itime=__ntsp__,
+istart=__ibegin__,
+inl=__inl__,
+inp=__inp__,
+rdts=__rdt__,
+fdate='__fdate__',
+fdata='__inputdatadir__',
+perturb(1)=__ptb1__,
+perturb(2)=__ptb2__,
+perturb(3)=__ptb3__,
+perturb(4)=__ptb4__,
+perturb(5)=__ptb5__,
+kmeltfrac=__kfrac__,
+iens=__eid__,
+inens=__nens__,
+/
